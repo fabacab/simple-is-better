@@ -2,8 +2,9 @@
 // @name        Simple is Better
 // @namespace   net.maymay.simple-is-better
 // @description Automatically loads the Simple Wikipedia version of articles that exist there, because simple is better.
+// @version     0.1.1
 // @include     https://*.wikipedia.org/*
-// @version     0.1
+// @domain      wikipedia.org
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setValue
 // @grant       GM_getValue
@@ -46,21 +47,6 @@
     }
 
     /**
-     * Checks whether or not a Simple article exists.
-     *
-     * @param {Location} loc
-     *
-     * @return {boolean}
-     */
-    function simpleArticleExists (loc) {
-        return 200 === GM_xmlhttpRequest({
-            'url': getSimpleUrl(loc),
-            'method': 'HEAD',
-            'synchronous': true
-        }).status;
-    }
-
-    /**
      * Inserts a link to the regular version of the given article.
      *
      * @param {Location} loc
@@ -68,6 +54,16 @@
     function linkToRegularArticle (loc) {
         var x = document.querySelector('#firstHeading');
         x.innerHTML = x.innerHTML + ' (<a href="' + getRegularUrl(loc) + '?redirect=no">read complex article</a>)';
+    }
+
+    /**
+     * Redirects the browser to the given URL.
+     *
+     * @param {string} to_url
+     */
+    function redirect (to_url) {
+        window.location.href = to_url;
+        GM_setValue('redirected', true);
     }
 
     /**
@@ -80,9 +76,17 @@
                 GM_setValue('redirected', false);
             }
         } else {
-            if (-1 === window.location.search.indexOf('redirect=no') && simpleArticleExists(window.location)) {
-                window.location.href = getSimpleUrl(window.location);
-                GM_setValue('redirected', true);
+            if (-1 === window.location.search.indexOf('redirect=no')) {
+                var simple_url = getSimpleUrl(window.location);
+                GM_xmlhttpRequest({
+                    'url': simple_url,
+                    'method': 'HEAD',
+                    'onload': function (response) {
+                        if (200 === response.status) {
+                            redirect(simple_url);
+                        }
+                    }
+                });
             }
         }
     }
