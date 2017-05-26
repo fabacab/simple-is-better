@@ -2,12 +2,13 @@
 // @name        Simple is Better
 // @namespace   net.maymay.simple-is-better
 // @description Automatically loads the Simple Wikipedia version of articles that exist there, because simple is better.
-// @version     0.1.1
+// @version     0.1.2
 // @include     https://*.wikipedia.org/*
 // @domain      wikipedia.org
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setValue
 // @grant       GM_getValue
+// @grant       GM_deleteValue
 // @updateURL   https://github.com/meitar/simple-is-better/raw/master/simple-is-better.user.js
 // ==/UserScript==
 
@@ -54,6 +55,7 @@
     function linkToRegularArticle (loc) {
         var x = document.querySelector('#firstHeading');
         x.innerHTML = x.innerHTML + ' (<a href="' + getRegularUrl(loc) + '?redirect=no">read complex article</a>)';
+        GM_deleteValue('redirected');
     }
 
     /**
@@ -71,9 +73,8 @@
      */
     function main () {
         if (isSimple(window.location.host)) {
-            if (GM_getValue('redirected')) {
+            if (GM_getValue('redirected', false)) {
                 linkToRegularArticle(window.location);
-                GM_setValue('redirected', false);
             }
         } else {
             if (-1 === window.location.search.indexOf('redirect=no')) {
