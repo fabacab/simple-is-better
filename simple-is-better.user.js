@@ -2,7 +2,7 @@
 // @name        Simple is Better
 // @namespace   net.maymay.simple-is-better
 // @description Automatically loads the Simple Wikipedia version of articles that exist there, because simple is better.
-// @version     0.1.2
+// @version     0.1.3
 // @include     https://*.wikipedia.org/*
 // @domain      wikipedia.org
 // @grant       GM_xmlhttpRequest
@@ -77,7 +77,9 @@
                 linkToRegularArticle(window.location);
             }
         } else {
-            if (-1 === window.location.search.indexOf('redirect=no')) {
+            if ( -1 === window.location.search.indexOf('redirect=no')
+                 && -1 === window.location.search.indexOf('action=edit')
+                 && -1 === window.location.search.indexof('action=submit') ) {
                 var simple_url = getSimpleUrl(window.location);
                 GM_xmlhttpRequest({
                     'url': simple_url,
